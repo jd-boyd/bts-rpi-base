@@ -75,10 +75,6 @@ RUN packer version && \
     qemu-arm-static -version | head -1 && \
     python3 --version
 
-# Set build environment variables
-ENV PACKER_LOG=1
-ENV PACKER_LOG_PATH=/workspace/packer.log
-
 # Default command
 CMD ["/bin/bash"]
 

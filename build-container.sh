@@ -114,7 +114,6 @@ build_rpi_image() {
         "-v" "$(pwd):/workspace"
         "-v" "$(pwd)/output:/workspace/output"
         "-e" "SSH_PUBLIC_KEY=$SSH_PUBLIC_KEY"
-        "-e" "PACKER_LOG=1"
         "-w" "/workspace"
         "$IMAGE_NAME"
     )
@@ -125,14 +124,27 @@ build_rpi_image() {
     fi
     
     # Run the build
-    if $CONTAINER_ENGINE "${CONTAINER_ARGS[@]}" packer build raspberry-pi.json; then
+    if $CONTAINER_ENGINE "${CONTAINER_ARGS[@]}" bash -c "
+        # Configure Packer to log to stdout/stderr instead of file
+        export PACKER_LOG=1
+        unset PACKER_LOG_PATH
+        
+        # Run packer build with verbose output
+        packer build raspberry-pi.json
+    "; then
         echo -e "${GREEN}Raspberry Pi image built successfully!${NC}"
         echo -e "${GREEN}Output files:${NC}"
         ls -la *.img.gz 2>/dev/null || echo "No compressed images found"
         ls -la output/ 2>/dev/null || echo "No output directory files"
     else
         echo -e "${RED}Build failed${NC}"
-        echo -e "${YELLOW}Check logs at: packer.log${NC}"
+        echo -e "${YELLOW}Debug information:${NC}"
+        echo "- Check the console output above for error details"
+        echo "- Verify the image checksum is correct in raspberry-pi.json"
+        echo "- Ensure SSH key is valid at: $SSH_KEY_PATH"
+        echo ""
+        echo "To debug further, run:"
+        echo "  $0 shell"
         exit 1
     fi
 }
@@ -162,7 +174,6 @@ open_shell() {
         "-v" "$(pwd):/workspace"
         "-v" "$(pwd)/output:/workspace/output"
         "-e" "SSH_PUBLIC_KEY=$SSH_PUBLIC_KEY"
-        "-e" "PACKER_LOG=1"
         "-w" "/workspace"
         "$IMAGE_NAME"
         "/bin/bash"

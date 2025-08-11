@@ -63,7 +63,7 @@ if [ -d "$TARGET_DIR" ]; then
 fi
 
 # Validate template directory
-if [ ! -f "$TEMPLATE_DIR/raspberry-pi.json" ]; then
+if [ ! -f "$TEMPLATE_DIR/raspberry-pi.pkr.hcl" ]; then
     echo -e "${RED}Error: Template files not found in $TEMPLATE_DIR${NC}"
     echo "Make sure you're running this script from the bts-rpi-base directory"
     exit 1
@@ -146,7 +146,7 @@ echo -e "${YELLOW}Updating file references...${NC}"
 
 # List of files to update
 declare -a FILES_TO_UPDATE=(
-    "$TARGET_DIR/raspberry-pi.json"
+    "$TARGET_DIR/raspberry-pi.pkr.hcl"
     "$TARGET_DIR/$FILES_DIR/$TARGET_NAME.py"
     "$TARGET_DIR/$FILES_DIR/$TARGET_NAME.service"
     "$TARGET_DIR/$FILES_DIR/$TARGET_NAME-update.sh"
@@ -186,11 +186,11 @@ done
 echo -e "${YELLOW}Updating project configuration...${NC}"
 
 # Update the Packer template with the new service name
-if [ -f "$TARGET_DIR/raspberry-pi.json" ]; then
+if [ -f "$TARGET_DIR/raspberry-pi.pkr.hcl" ]; then
     # Update the service file reference in Packer template
-    sed -i "s/app\.service/$TARGET_NAME.service/g" "$TARGET_DIR/raspberry-pi.json"
+    sed -i "s/app\.service/$TARGET_NAME.service/g" "$TARGET_DIR/raspberry-pi.pkr.hcl"
     # Update the update script reference
-    sed -i "s/app-update\.sh/$TARGET_NAME-update.sh/g" "$TARGET_DIR/raspberry-pi.json"
+    sed -i "s/app-update\.sh/$TARGET_NAME-update.sh/g" "$TARGET_DIR/raspberry-pi.pkr.hcl"
 fi
 
 # Update systemd service file paths

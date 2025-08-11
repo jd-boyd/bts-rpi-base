@@ -111,8 +111,9 @@ build_rpi_image() {
         "--rm"
         "-it"
         "--privileged"
-        "-v" "$(pwd):/workspace"
-        "-v" "$(pwd)/output:/workspace/output"
+        "--userns=host"
+        "-v" "$(pwd):/workspace:Z"
+        "-v" "$(pwd)/output:/workspace/output:Z"
         "-e" "SSH_PUBLIC_KEY=$SSH_PUBLIC_KEY"
         "-w" "/workspace"
         "$IMAGE_NAME"
@@ -121,6 +122,9 @@ build_rpi_image() {
     # Add Docker-specific arguments
     if [ "$CONTAINER_ENGINE" = "docker" ]; then
         CONTAINER_ARGS+=("--security-opt" "apparmor:unconfined")
+    else
+        # Podman-specific: ensure proper user mapping
+        CONTAINER_ARGS+=("--user" "$(id -u):$(id -g)")
     fi
     
     # Run the build
@@ -130,7 +134,7 @@ build_rpi_image() {
         unset PACKER_LOG_PATH
         
         # Run packer build with verbose output
-        packer build raspberry-pi.json
+        packer build raspberry-pi.pkr.hcl
     "; then
         echo -e "${GREEN}Raspberry Pi image built successfully!${NC}"
         echo -e "${GREEN}Output files:${NC}"
@@ -140,7 +144,7 @@ build_rpi_image() {
         echo -e "${RED}Build failed${NC}"
         echo -e "${YELLOW}Debug information:${NC}"
         echo "- Check the console output above for error details"
-        echo "- Verify the image checksum is correct in raspberry-pi.json"
+        echo "- Verify the image checksum is correct in raspberry-pi.pkr.hcl"
         echo "- Ensure SSH key is valid at: $SSH_KEY_PATH"
         echo ""
         echo "To debug further, run:"

@@ -66,7 +66,7 @@ else
 fi
 
 # Check if the Packer template was updated
-if grep -q "$TEST_PROJECT.service" "$TEST_DIR/raspberry-pi.json"; then
+if grep -q "$TEST_PROJECT.service" "$TEST_DIR/raspberry-pi.pkr.hcl"; then
     echo -e "${GREEN}✓ Packer template updated correctly${NC}"
 else
     echo -e "${RED}✗ Packer template not updated correctly${NC}"

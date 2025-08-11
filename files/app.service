@@ -1,0 +1,31 @@
+[Unit]
+Description=App Python Service
+After=multi-user.target
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+ExecStart=/opt/app/venv/bin/python /opt/app/app.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=app
+
+# Security settings
+NoNewPrivileges=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/log/app
+ReadOnlyPaths=/opt/app
+
+# Environment
+Environment=PYTHONUNBUFFERED=1
+Environment=VIRTUAL_ENV=/opt/app/venv
+Environment=PATH=/opt/app/venv/bin:/usr/local/bin:/usr/bin:/bin
+
+[Install]
+WantedBy=multi-user.target
